@@ -1,4 +1,5 @@
 import State from "./State";
+import './main.scss'
 
 function App() {
   return (
