@@ -1,55 +1,48 @@
-import React, { Component } from 'react'
+import React, { useEffect, useState } from "react";
 import { words } from './words.json'
 
-export default class State extends Component {
-
-
-    static defaultProps = {
-        maxWrong: 6
-    }
+export default function State({ maxWrong = 6 }) {
 
     // get random word from json file
-    generateRandomWord = () => {
+    const generateRandomWord = () => {
         return words[Math.floor(Math.random() * words.length)]
     }
 
-    // initialize the state
-    state = {
-        nWrong: 0,
-        gussed: new Set(),
-        answer: this.generateRandomWord()
-    }
+
+    // initialize hooks
+    const [nWrong, setNWrong] = useState(0)
+    const [gussed, setGussed] = useState(new Set())
+    const [answer, setAnswer] = useState(generateRandomWord())
+
 
     // generate words to display user
-    genrateWords = () => {
-        return this.state.answer.split("").map(ltr => {
-            return this.state.gussed.has(ltr) ? ltr : "_"
+    const genrateWords = () => {
+        return answer.split("").map(ltr => {
+            return gussed.has(ltr) ? ltr : "_"
         })
     }
 
     // create buttons of alphabet
-    createBtn = () => {
+    const createBtn = () => {
         return 'abcdefghijklmnopqrstuvwxyz'.split('').map((btn, index) => {
             return <button
-                onClick={this.generateBtn}
+                onClick={generateBtn}
                 key={index}
-                disabled={this.state.gussed.has(btn)}>{btn}</button>
+                disabled={gussed.has(btn)}>{btn}</button>
         })
     }
 
     // manage state when user click button
-    generateBtn = (e) => {
+    const generateBtn = (e) => {
         const userGuess = e.target.innerHTML
-        this.setState(prevState => ({
-            gussed: prevState.gussed.add(userGuess),
-            nWrong: prevState.nWrong + (prevState.answer.includes(userGuess) ? 0 : 1)
-        }))
+        setGussed({ gussed: gussed.add(userGuess) })
+        setNWrong({ nWrong: nWrong + (answer.includes(userGuess) ? 0 : 1) })
     }
 
     // manage image that show the user with css styling
-    generateImage = () => {
+    const generateImage = () => {
         let nums = ['two', 'three', 'four', 'five', 'six']
-        const divElements = Array.from({ length: this.state.nWrong }).map((div, idx) => {
+        const divElements = Array.from({ length: nWrong }).map((div, idx) => {
             if (idx === 5) {
                 return document.querySelector('.base').classList.add('lose')
             }
@@ -59,29 +52,27 @@ export default class State extends Component {
     }
 
     // manage the state of game
-    handleWin = () => {
-        if (this.state.answer === this.genrateWords().join("")) {
+    const handleWin = () => {
+        if (answer === genrateWords().join("")) {
             return <p className='win'>you win</p>
-        } else if (this.state.nWrong >= this.props.maxWrong) {
+        } else if (nWrong >= maxWrong) {
             return <p className='lose'>you lose</p>
         } else {
-            return <p className='generateBtn'>{this.createBtn()}</p>
+            return <p className='generateBtn'>{createBtn()}</p>
         }
     }
 
-    render() {
-        const gameOver = this.state.nWrong >= this.props.maxWrong
-        return (
-            <div className="State">
-                <div className='wrrap'>
-                    <div className='one'></div>
-                    <div className='base'></div>
-                    {this.generateImage()}
-                </div>
-                <p>gussed number: {this.state.nWrong}</p>
-                <p className='genrateWords'>{!gameOver ? this.genrateWords() : this.state.answer}</p>
-                {this.handleWin()}
+
+    return (
+        <div className="State">
+            <div className='wrrap'>
+                <div className='one'></div>
+                <div className='base'></div>
+                {generateImage()}
             </div>
-        )
-    }
+            <p>gussed number: {nWrong}</p>
+            <p className='genrateWords'>{!(nWrong >= maxWrong) ? genrateWords() : answer}</p>
+            {handleWin()}
+        </div>
+    )
 }
